@@ -23,52 +23,80 @@ class Dashboard(tk.Tk):
         self._creer_boutons()
 
     def _creer_observateurs(self) -> None:
-        # À compléter :
-        # Instanciez AffichageEtat, AffichageTemps, BarreProgression,
-        # CompteurSessions et LoggerSession
-        pass
+        self._affichage_temps = AffichageTemps(self)
+        self._affichage_etat = AffichageEtat(self)
+        self._barre_progression = BarreProgression(self)
+        self._compteur_sessions = CompteurSessions(self)
+        self._logger_session = LoggerSession()
 
     def _abonner_observateurs(self) -> None:
-        # À compléter :
-        # Abonnez tous les observateurs au minuteur
-        pass
+        self._minuteur.abonner(self._affichage_temps)
+        self._minuteur.abonner(self._affichage_etat)
+        self._minuteur.abonner(self._barre_progression)
+        self._minuteur.abonner(self._compteur_sessions)
+        self._minuteur.abonner(self._logger_session)
 
     def _creer_boutons(self) -> None:
         frame = tk.Frame(self)
         frame.pack(pady=10)
 
-        self._btn_start = tk.Button(frame, text="Démarrer", command=self._demarrer)
+        self._btn_start = tk.Button(
+            frame,
+            text="Démarrer",
+            command=self._demarrer
+        )
         self._btn_start.pack(side=tk.LEFT, padx=5)
 
         self._btn_pause = tk.Button(
-            frame, text="Pause", command=self._pause, state=tk.DISABLED
+            frame,
+            text="Pause",
+            command=self._pause,
+            state=tk.DISABLED
         )
         self._btn_pause.pack(side=tk.LEFT, padx=5)
 
-        self._btn_reset = tk.Button(frame, text="Réinitialiser", command=self._reset)
+        self._btn_reset = tk.Button(
+            frame,
+            text="Réinitialiser",
+            command=self._reset
+        )
         self._btn_reset.pack(side=tk.LEFT, padx=5)
 
     def _demarrer(self) -> None:
-        # À compléter :
-        # Activez le minuteur et démarrez la boucle _tick()
-        # Mettez à jour les boutons
-        pass
+        self._en_marche = True
+
+        self._btn_start.config(state=tk.DISABLED)
+        self._btn_pause.config(state=tk.NORMAL)
+
+        self._tick()
 
     def _pause(self) -> None:
-        # À compléter :
-        # Appelez basculer_pause() sur le minuteur
-        # Mettez à jour le texte du bouton
-        # Si on reprend, relancez _tick()
-        pass
+        self._minuteur.basculer_pause()
+
+        donnees = self._minuteur.get_donnees()
+
+        if donnees["en_pause"]:
+            self._btn_pause.config(text="Reprendre")
+        else:
+            self._btn_pause.config(text="Pause")
+            self._tick()
 
     def _reset(self) -> None:
-        # À compléter :
-        # Réinitialisez le minuteur
-        # Mettez à jour les boutons
-        pass
+        self._en_marche = False
+
+        self._minuteur.reinitialiser()
+
+        self._btn_start.config(state=tk.NORMAL)
+        self._btn_pause.config(
+            state=tk.DISABLED,
+            text="Pause"
+        )
 
     def _tick(self) -> None:
-        # À compléter :
-        # Si en marche et pas en pause : appeler minuteur.tick()
-        # Planifier le prochain appel avec self.after()
-        pass
+        donnees = self._minuteur.get_donnees()
+
+        if self._en_marche and not donnees["en_pause"]:
+            self._minuteur.tick()
+
+        if self._en_marche:
+            self.after(self.INTERVALLE_MS, self._tick)

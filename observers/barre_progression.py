@@ -8,9 +8,21 @@ class BarreProgression(Observateur):
         self._canvas = tk.Canvas(parent, width=300, height=20, bg="white")
         self._canvas.pack(pady=10)
 
-    def actualiser(self, sujet) -> None:
-        # À compléter :
-        # Récupérez temps_restant et duree_totale depuis sujet.get_donnees()
-        # Calculez la largeur proportionnelle (300 * temps_restant / duree_totale)
-        # Effacez le canvas et dessinez le rectangle
-        pass
+def actualiser(self, sujet) -> None:
+    donnees = sujet.get_donnees()
+
+    temps_restant = donnees["temps_restant"]
+    duree_totale = donnees["duree_totale"]
+
+    largeur = int(300 * temps_restant / duree_totale)
+
+    self._canvas.delete("all")
+
+    self._canvas.create_rectangle(
+        0,
+        0,
+        largeur,
+        20,
+        fill="green",
+        outline=""
+    )
